@@ -5,51 +5,64 @@ function getWeather() {
   const city = document.getElementById("city").value.trim();
   if (!city) return;
 
-  fetchWeather(`http://localhost:5000/weather?city=${city}`, city);
+  document.getElementById("result").innerHTML = "⏳ Loading...";
+
+  fetchWeather(`https://weather-app-ivt9.onrender.com/weather?city=${city}`, city);
 }
 
 // 🔥 fetch weather
 async function fetchWeather(url, cityInput) {
-  const res = await fetch(url);
-  const data = await res.json();
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
 
-  if (!data.name) {
-    document.getElementById("result").innerHTML = "❌ Not found";
-    return;
+    if (!data.name) {
+      document.getElementById("result").innerHTML = "❌ City not found";
+      return;
+    }
+
+    const city = data.name;
+    saveHistory(city);
+
+    const icon = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+
+    document.getElementById("result").innerHTML = `
+      <h2>${city}</h2>
+      <img src="${icon}">
+      <h1>${data.main.temp} °C</h1>
+      <p>${data.weather[0].main}</p>
+      <p>💧 ${data.main.humidity}% | 🌬 ${data.wind.speed} m/s</p>
+    `;
+
+    getForecast(city);
+
+  } catch (error) {
+    document.getElementById("result").innerHTML = "⚠️ Error loading data";
   }
-
-  const city = data.name;
-  saveHistory(city);
-
-  const icon = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-
-  document.getElementById("result").innerHTML = `
-    <h2>${city}</h2>
-    <img src="${icon}">
-    <h1>${data.main.temp} °C</h1>
-    <p>${data.weather[0].main}</p>
-  `;
-
-  getForecast(city);
 }
 
 // 📊 forecast
 async function getForecast(city) {
-  const res = await fetch(`http://localhost:5000/forecast?city=${city}`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`https://weather-app-ivt9.onrender.com/forecast?city=${city}`);
+    const data = await res.json();
 
-  const temps = [];
-  const labels = [];
+    const temps = [];
+    const labels = [];
 
-  for (let i = 0; i < data.list.length; i += 8) {
-    temps.push(data.list[i].main.temp);
-    labels.push(data.list[i].dt_txt.split(" ")[0]);
+    for (let i = 0; i < data.list.length; i += 8) {
+      temps.push(data.list[i].main.temp);
+      labels.push(data.list[i].dt_txt.split(" ")[0]);
+    }
+
+    drawChart(labels, temps);
+
+  } catch (error) {
+    console.log("Forecast error");
   }
-
-  drawChart(labels, temps);
 }
 
-// 📈 chart
+// 📈 chart (FIXED)
 function drawChart(labels, temps) {
   const ctx = document.getElementById("chart");
 
@@ -60,8 +73,9 @@ function drawChart(labels, temps) {
     data: {
       labels,
       datasets: [{
-        label: "Temp",
-        data: temps
+        label: "Temperature (°C)",
+        data: temps,
+        borderWidth: 2
       }]
     }
   });
@@ -94,9 +108,10 @@ function showHistory() {
   });
 }
 
-// enter key
+// ⌨️ enter key
 document.getElementById("city").addEventListener("keypress", e => {
   if (e.key === "Enter") getWeather();
 });
 
+// 🔄 load history
 showHistory();
