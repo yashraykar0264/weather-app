@@ -1,25 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Weather Pro</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather Pro</title>
+
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+
 </head>
 <body>
 
-<div class="card">
-  <h1>🌤 Weather Pro</h1>
+<div class="app">
+  <div class="card">
 
-  <input id="city" placeholder="Enter city">
-  <button onclick="getWeather()">Search</button>
+    <h1>☁️ Weather Pro</h1>
 
-  <div id="result"></div>
-  <div id="history"></div>
+    <div class="search">
+      <input id="city" placeholder="Search city..." />
+      <button onclick="getWeather()">Search</button>
+    </div>
 
-  <canvas id="chart"></canvas>
+    <div class="actions">
+      <button onclick="getLocation()">📍 Location</button>
+      <button onclick="toggleMode()">🌗 Mode</button>
+    </div>
+
+    <div id="result"></div>
+    <div id="ai"></div>
+    <div id="history"></div>
+
+    <canvas id="chart"></canvas>
+
+  </div>
 </div>
 
 <script src="script.js"></script>
+
+<script>
+// PWA register
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
 </body>
 </html>
